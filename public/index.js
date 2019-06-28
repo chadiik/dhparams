@@ -2549,7 +2549,7 @@
 
       /**
        * Registers DHP to show when 'Shift + combo keys' are pressed
-       * @param {Array<string>} [args]
+       * @param {Array<string>} [args] defaults: shift + d,h
        */
       static RegisterKeyCombo(...args)
       {
