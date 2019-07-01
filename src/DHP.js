@@ -41,7 +41,7 @@ export default class DHP
                 }
                 console.log('DHP initiated');
             }
-            _gui.domElement.style.display = '';
+            DHP.gui.domElement.style.display = '';
         }
         else if(_gui)
         {
