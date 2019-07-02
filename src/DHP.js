@@ -52,34 +52,6 @@ export default class DHP
     }
 
     /**
-     * Registers DHP to show when 'Shift + combo keys' are pressed
-     * @param {Array<string>} [args] defaults: shift + d,h
-     */
-    static RegisterKeyCombo(...args)
-    {
-        const combo = !args || args.length == 0 ? ['d', 'h'] : args;
-
-        window.addEventListener('keydown', e => {
-            if (e.shiftKey)
-            {
-                const numCombo = combo.length;
-
-                _comboIndex = e.key.toLowerCase() === combo[_comboIndex] ? _comboIndex + 1 : 0;
-                    
-                if(_comboIndex === numCombo)
-                {
-                    DHP.show = !DHP.show;
-                    _comboIndex = 0;
-                }
-            }
-            else
-            {
-                _comboIndex = 0;
-            }
-        });
-    }
-
-    /**
      * @param {string} name 
      * @param {any} value 
      * @param {ParameterCallback} callback 
@@ -107,5 +79,33 @@ export default class DHP
     static Get(name)
     {
         return _controller[name];
+    }
+
+    /**
+     * Registers DHP to show when 'Shift + combo keys' are pressed
+     * @param {Array<string>} [args] defaults: shift + d,h
+     */
+    static RegisterKeyCombo(...args)
+    {
+        const combo = !args || args.length == 0 ? ['d', 'h'] : args;
+
+        window.addEventListener('keydown', e => {
+            if (e.shiftKey)
+            {
+                const numCombo = combo.length;
+
+                _comboIndex = e.key.toLowerCase() === combo[_comboIndex] ? _comboIndex + 1 : 0;
+                    
+                if(_comboIndex === numCombo)
+                {
+                    DHP.show = !DHP.show;
+                    _comboIndex = 0;
+                }
+            }
+            else
+            {
+                _comboIndex = 0;
+            }
+        });
     }
 }

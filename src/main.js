@@ -6,15 +6,16 @@ window.addEventListener('load', e => {
         prop2: 0
     };
 
-    DHP.Add('obj\'s prop', obj.prop, value => {
+    DHP.Add('Obj\'s prop', obj.prop, value => {
         obj.prop = Math.max(0, value); // validate value
         console.log('obj.prop', obj.prop);
     });
 
-    DHP.Add('obj\'s prop2', obj.prop2, value => {
+    DHP.Add('Obj\'s prop2', obj.prop2, value => {
         obj.prop2 = Math.max(0, value); // validate value
         console.log('obj.prop2', obj.prop2);
     });
 
-    DHP.RegisterKeyCombo(); // or DHP.show = true;
+    //DHP.RegisterKeyCombo(); // or DHP.show = true;
+    DHP.show = true;
 });
