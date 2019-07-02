@@ -1,4 +1,5 @@
 import * as dat from 'dat.gui';
+import Preset from './Preset';
 
 /** ParameterCallback
  * @callback ParameterCallback
@@ -12,6 +13,57 @@ const _controller = {};
 
 let _shown = false;
 let _comboIndex = 0;
+
+function loadPresets()
+{
+    let untitledPreset = 0;
+    const presetsFolder = DHP.gui.addFolder('Presets');
+    
+    const insertPreset = preset => {
+        const keys = Object.keys(preset.data);
+        if(keys.every(key => _controller.hasOwnProperty(key)))
+        {
+            const guiName = 'Load \'' + (preset.name || (++untitledPreset)) + '\'';
+            const presetController = {};
+            presetController[guiName] = () => keys.forEach(key => _controller[key] = preset.data[key]);
+            presets.controllers[preset.name] = presetsFolder.add(presetController, guiName);
+        }
+    };
+
+    const presets = {
+        New: 'default',
+        Save: () => {
+            if(presets.New.length > 0)
+            {
+                if(presets.controllers[presets.New])
+                {
+                    if(confirm('Are you sure you want to overwrite preset: \'' + presets.New + '\'?'))
+                    {
+                        presets.controllers[presets.New].remove();
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+                const preset = new Preset(presets.New);
+                preset.data = Preset.Flatten(_controller);
+                preset.Save('presets/' + presets.New);
+                insertPreset(preset);
+            }
+            else{
+                alert('Preset should have a name');
+            }
+        },
+        controllers: {}
+    };
+    
+    presetsFolder.add(presets, 'New');
+    presetsFolder.add(presets, 'Save');
+
+    Preset.Get('presets')
+    .then( results => results.forEach(insertPreset));
+}
 
 export default class DHP
 {
@@ -37,8 +89,10 @@ export default class DHP
             {
                 for(const key in _controller)
                 {
-                    DHP.gui.add(_controller, key);
+                    DHP.gui.add(_controller, key).listen();
                 }
+
+                loadPresets();
                 console.log('DHP initiated');
             }
             DHP.gui.domElement.style.display = '';
@@ -61,6 +115,7 @@ export default class DHP
         const local = {};
         local[name] = _controller[name] = value;
         Object.defineProperty(_controller, name, {
+            enumerable: true,
             get: () => local[name],
             set: value => {
                 if(value !== local[name])
