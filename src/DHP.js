@@ -31,7 +31,7 @@ function loadPresets()
     };
 
     const presets = {
-        New: 'default',
+        New: 'Main',
         Save: () => {
             if(presets.New.length > 0)
             {

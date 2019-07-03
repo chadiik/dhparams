@@ -16,6 +16,6 @@ window.addEventListener('load', e => {
         console.log('obj.prop2', obj.prop2);
     });
 
-    //DHP.RegisterKeyCombo(); // or DHP.show = true;
-    DHP.show = true;
+    DHP.RegisterKeyCombo(); // or DHP.show = true;
+    //DHP.show = true;
 });
