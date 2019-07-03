@@ -1,5 +1,22 @@
-import firebase from 'firebase/app';
-import 'firebase/firestore';
+//import firebase from 'firebase/app';
+//import 'firebase/firestore';
+
+function dynamicLoad(url, loadCheck)
+{
+    return new Promise( (resolve, reject) => {
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = url;
+        document.getElementsByTagName('head')[0].appendChild(script);
+        const iid = setInterval( () => {
+            if(loadCheck && loadCheck())
+            {
+                clearInterval(iid);
+                resolve();
+            }
+        }, 200);
+    });
+}
 
 const firebaseConfig = {
     apiKey: "AIzaSyClSpwsS-gJDhLihV0M1klrAMEIjwfd7rs",
@@ -18,22 +35,44 @@ let _store;
 
 export default class Firebase
 {
+    /** @return {Promise<firebase.app.App>} */
     static get app()
     {
-        if(!_app)
-        {
-            _app = firebase.initializeApp(firebaseConfig);
-        }
-        return _app;
+        return new Promise( (resolve, reject) => {
+            if(!_app)
+            {
+                // _app = firebase.initializeApp(firebaseConfig);
+                dynamicLoad('https://www.gstatic.com/firebasejs/6.2.4/firebase-app.js', () => window['firebase'])
+                .then( () => {
+                    _app = firebase.initializeApp(firebaseConfig);
+                    resolve(_app);
+                });
+            }
+            else
+            {
+                resolve(_app);
+            }
+        });
     }
 
+    /** @return {Promise<firebase.firestore.Firestore>} */
     static get store()
     {
-        if(!_store)
-        {
-            _store = Firebase.app.firestore();
-        }
-        return _store;
+        return new Promise( (resolve, reject) => {
+            if(!_store)
+            {
+                Firebase.app
+                .then( () => dynamicLoad('https://www.gstatic.com/firebasejs/6.2.4/firebase-firestore.js', () => firebase.firestore) )
+                .then( () => {
+                    _store = _app.firestore();
+                    resolve(_store);
+                });
+            }
+            else
+            {
+                resolve(_store);
+            }
+        });
     }
 
     /**
@@ -47,11 +86,11 @@ export default class Firebase
             const segments = path.split('/');
             if(segments.length % 2 === 1)
             {
-                return Firebase.store.collection(path).doc().set(obj);
+                return Firebase.store.then( store => store.collection(path).doc().set(obj));
             }
-            return Firebase.store.doc(path).set(obj);
+            return Firebase.store.then( store => store.doc(path).set(obj));
         }
-        return Firebase.store.collection('root').add(obj);
+        return Firebase.store.then( store => store.collection('root').add(obj));
     }
 
     /** @returns {Promise<{id, data}|Array<{id, data}>>} */
@@ -62,12 +101,12 @@ export default class Firebase
             const segments = path.split('/');
             if(segments.length % 2 === 1)
             {
-                return Firebase.store.collection(path).get()
+                return Firebase.store.then( store => store.collection(path).get())
                 .then(query => Promise.resolve(query.docs.map(doc => { 
                     return {id: doc.id, data: doc.data()};
                 })));
             }
-            return Firebase.store.doc(path).get()
+            return Firebase.store.then( store => store.doc(path).get())
             .then(snapshot => Promise.resolve({id: snapshot.id, data: snapshot.data()}));
         }
 
