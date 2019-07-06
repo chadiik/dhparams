@@ -2678,11 +2678,22 @@
 
   /** @type {dat.GUI} */
   let _gui;
+  /** @type {Object.<string, dat.GUIController>} */
+  const _guiControllers = {};
 
   const _controller = {};
 
   let _shown = false;
   let _comboIndex = 0;
+
+  function add(key)
+  {
+      if(_guiControllers[key])
+      {
+          _guiControllers[key].remove();
+      }
+      _guiControllers[key] = DHP.gui.add(_controller, key);
+  }
 
   function loadPresets()
   {
@@ -2695,7 +2706,12 @@
           {
               const guiName = 'Load \'' + (preset.name || (++untitledPreset)) + '\'';
               const presetController = {};
-              presetController[guiName] = () => keys.forEach(key => _controller[key] = preset.data[key]);
+              presetController[guiName] = () => {
+                  keys.forEach(key => _controller[key] = preset.data[key]);
+                  for(const c in _guiControllers){
+                      _guiControllers[c].updateDisplay();
+                  }
+              };
               presets.controllers[preset.name] = presetsFolder.add(presetController, guiName);
           }
       };
@@ -2759,7 +2775,7 @@
               {
                   for(const key in _controller)
                   {
-                      DHP.gui.add(_controller, key).listen();
+                      add(key);
                   }
 
                   loadPresets();
@@ -2797,7 +2813,7 @@
 
           if(_gui)
           {
-              DHP.gui.add(_controller, name);
+              add(key);
           }
       }
 
